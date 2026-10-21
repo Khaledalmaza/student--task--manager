@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="app">
+        <img
+            src="anydo-task-management-students-950x500.png"
+            alt="Student Task Manager banner"
+            class="app-logo"
+        >
+
+        <h1>My Student Task Manager</h1>
+        <p class="subtitle">Organize your tasks and get things done.</p>
+
+        <div class="task-entry">
+            <input type="text" id="taskInput" placeholder="Write a task">
+            <button id="addTaskButton" onclick="addTask()">+ Add Task</button>
+        </div>
+
+        <h2>My Tasks</h2>
+        <ul id="taskList"></ul>
+    </main>
+
+    <script>
+        let savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+        let tasks = savedTasks.map(function (task) {
+            if (typeof task === "string") {
+                return { name: task, completed: false };
+            }
+            return task;
+        });
+
+        function saveTasks() {
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        function showTasks() {
+            let taskList = document.getElementById("taskList");
+            taskList.innerHTML = "";
+
+            tasks.forEach(function (task, index) {
+                let item = document.createElement("li");
+
+                let taskText = document.createElement("span");
+                taskText.className = "task-name";
+                taskText.textContent = task.name;
+
+                if (task.completed) {
+                    let checkMark = document.createElement("span");
+                    checkMark.className = "check-mark";
+                    checkMark.textContent = " ✓";
+                    taskText.appendChild(checkMark);
+                }
+
+                let doneButton = document.createElement("button");
+                doneButton.className = "done-button";
+                doneButton.textContent = task.completed ? "Undo" : "Done";
+
+                doneButton.onclick = function () {
+                    task.completed = !task.completed;
+                    saveTasks();
+                    showTasks();
+                };
+
+                let deleteButton = document.createElement("button");
+                deleteButton.className = "delete-button";
+                deleteButton.textContent = "Delete";
+
+                deleteButton.onclick = function () {
+                    tasks.splice(index, 1);
+                    saveTasks();
+                    showTasks();
+                };
+
+                item.appendChild(taskText);
+                item.appendChild(doneButton);
+                item.appendChild(deleteButton);
+                taskList.appendChild(item);
+            });
+        }
+
+        function addTask() {
+            let input = document.getElementById("taskInput");
+
+            if (input.value.trim() === "") {
+                alert("Write a task first!");
+                return;
+            }
+
+            tasks.push({
+                name: input.value.trim(),
+                completed: false
+            });
+
+            saveTasks();
+            input.value = "";
+            showTasks();
+        }
+
+        saveTasks();
+        showTasks();
+    </script>
+
+</body>
+</html>
